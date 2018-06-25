@@ -3,13 +3,20 @@ from random import random
 import numpy as np
 
 
+"""
+This file contains tools for generating functions and starting points.
+
+It is highly advised to leave this file be as it is.
+"""
+
+
 class FunGen:
     def __init__(self, dim, n, scope):
         self.dim = dim
         self.n = n
         self.functions = []
         with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
-            self.x = tf.get_variable('x' + str(dim), [dim], )
+            self.x = tf.get_variable('x' + str(dim), [dim], dtype=np.float32, )
 
     def generate(self, proto_function):
         self.functions = [proto_function(self.x, self.dim) for _ in range(self.n)]

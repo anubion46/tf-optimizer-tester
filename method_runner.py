@@ -9,7 +9,15 @@ from pathos.multiprocessing import ProcessingPool as Pool
 from functools import partial
 
 
-processes = 3
+"""
+This file contains essential part of the code.
+
+It is highly advised to leave this file be as it is.
+"""
+
+
+# Number of processes for multiprocessing 
+processes = 2
 
 def search_learning_rate(metric, data, search_decay=False):
     best_learning_rate = list(data.keys())[0]
@@ -66,7 +74,7 @@ class MethodRunner:
                     function_generator = generator.FunGen(dim, self.train_losses[loss][1][dim], loss)
                     functions = function_generator.generate(self.train_losses[loss][0])
                     for f in functions:
-                        points = generator.generate_points(dim, self.m, self.radius, f[2])
+                        points = generator.generate_points(dim, self.m, self.radius, f[1])
                         with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                             global_step = tf.Variable(0.0, name='gradient_train_gs' + str(dim), trainable=False, dtype=tf.float32)
                             if self.step > 0:
@@ -124,7 +132,7 @@ class MethodRunner:
                     function_generator = generator.FunGen(dim, self.test_losses[loss][1][dim], loss)
                     functions = function_generator.generate(self.test_losses[loss][0])
                     for f in functions:
-                        points = generator.generate_points(dim, self.m, self.radius, f[2])
+                        points = generator.generate_points(dim, self.m, self.radius, f[1])
 
                         with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                             global_step = tf.Variable(0.0, name='gradient_test_gs' + str(dim), trainable=False, dtype=tf.float32)
@@ -151,7 +159,7 @@ class MethodRunner:
             return (metric_name, metric(results, axis=0))
 
         with Pool(processes) as p:
-            pairs = [[best_params['best'], np.nanmin, 'best'], [best_params['worst'], np.nanmax, 'worst'], [best_params['mean'], np.nanmean, 'mean'], [best_params['median'], np.nanmedian, 'median']]
+            pairs = [[best_params['best'], np.min, 'best'], [best_params['worst'], np.max, 'worst'], [best_params['mean'], np.mean, 'mean'], [best_params['median'], np.median, 'median']]
             test_results = p.map(test, pairs)
         test_results = {x: y for (x, y) in test_results}
 
@@ -194,7 +202,7 @@ class MethodRunner:
                     function_generator = generator.FunGen(dim, self.train_losses[loss][1][dim], loss)
                     functions = function_generator.generate(self.train_losses[loss][0])
                     for f in functions:
-                        points = generator.generate_points(dim, self.m, self.radius, f[2])
+                        points = generator.generate_points(dim, self.m, self.radius, f[1])
                         with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                             global_step = tf.Variable(0.0, name='gradient_train_gs' + str(dim), trainable=False, dtype=tf.float32)
                             if self.step > 0:
@@ -214,7 +222,7 @@ class MethodRunner:
                                 for i in range(self.iterations):
                                     _, f_curr = sess.run([optimizer, f_temp])
                                 temp = np.append(temp, f_curr)
-            return learning_rate, {'best': np.nanmin(temp).item(), 'worst': np.nanmax(temp).item(), 'mean': np.nanmean(temp).item(), "median": np.nanmedian(temp).item()}
+            return learning_rate, {'best': np.min(temp).item(), 'worst': np.max(temp).item(), 'mean': np.mean(temp).item(), "median": np.median(temp).item()}
 
         ## Parallel training
         with Pool(processes) as p:
@@ -252,7 +260,7 @@ class MethodRunner:
                     function_generator = generator.FunGen(dim, self.test_losses[loss][1][dim], loss)
                     functions = function_generator.generate(self.test_losses[loss][0])
                     for f in functions:
-                        points = generator.generate_points(dim, self.m, self.radius, f[2])
+                        points = generator.generate_points(dim, self.m, self.radius, f[1])
 
                         with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                             global_step = tf.Variable(0.0, name='gradient_test_gs' + str(dim), trainable=False, dtype=tf.float32)
@@ -279,7 +287,7 @@ class MethodRunner:
             return (metric_name, metric(results, axis=0))
 
         with Pool(processes) as p:
-            pairs = [[best_params['best'], np.nanmin, 'best'], [best_params['worst'], np.nanmax, 'worst'], [best_params['mean'], np.nanmean, 'mean'], [best_params['median'], np.nanmedian, 'median']]
+            pairs = [[best_params['best'], np.min, 'best'], [best_params['worst'], np.max, 'worst'], [best_params['mean'], np.mean, 'mean'], [best_params['median'], np.median, 'median']]
             test_results = p.map(test, pairs)
         test_results = {x: y for (x, y) in test_results}
 
@@ -321,7 +329,7 @@ class MethodRunner:
                     function_generator = generator.FunGen(dim, self.train_losses[loss][1][dim], loss)
                     functions = function_generator.generate(self.train_losses[loss][0])
                     for f in functions:
-                        points = generator.generate_points(dim, self.m, self.radius, f[2])
+                        points = generator.generate_points(dim, self.m, self.radius, f[1])
                         with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                             global_step = tf.Variable(0.0, name='gradient_train_gs' + str(dim), trainable=False, dtype=tf.float32)
                             if self.step > 0:
@@ -341,7 +349,7 @@ class MethodRunner:
                                 for i in range(self.iterations):
                                     _, f_curr = sess.run([optimizer, f_temp])
                                 temp = np.append(temp, f_curr)
-            return learning_rate, {'best': np.nanmin(temp).item(), 'worst': np.nanmax(temp).item(), 'mean': np.nanmean(temp).item(), "median": np.nanmedian(temp).item()}
+            return learning_rate, {'best': np.min(temp).item(), 'worst': np.max(temp).item(), 'mean': np.mean(temp).item(), "median": np.median(temp).item()}
 
         ## Parallel training
         with Pool(processes) as p:
@@ -379,7 +387,7 @@ class MethodRunner:
                     function_generator = generator.FunGen(dim, self.test_losses[loss][1][dim], loss)
                     functions = function_generator.generate(self.test_losses[loss][0])
                     for f in functions:
-                        points = generator.generate_points(dim, self.m, self.radius, f[2])
+                        points = generator.generate_points(dim, self.m, self.radius, f[1])
 
                         with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                             global_step = tf.Variable(0.0, name='gradient_test_gs' + str(dim), trainable=False, dtype=tf.float32)
@@ -406,7 +414,7 @@ class MethodRunner:
             return (metric_name, metric(results, axis=0))
 
         with Pool(processes) as p:
-            pairs = [[best_params['best'], np.nanmin, 'best'], [best_params['worst'], np.nanmax, 'worst'], [best_params['mean'], np.nanmean, 'mean'], [best_params['median'], np.nanmedian, 'median']]
+            pairs = [[best_params['best'], np.min, 'best'], [best_params['worst'], np.max, 'worst'], [best_params['mean'], np.mean, 'mean'], [best_params['median'], np.median, 'median']]
             test_results = p.map(test, pairs)
         test_results = {x: y for (x, y) in test_results}
 
@@ -448,7 +456,7 @@ class MethodRunner:
                     function_generator = generator.FunGen(dim, self.train_losses[loss][1][dim], loss)
                     functions = function_generator.generate(self.train_losses[loss][0])
                     for f in functions:
-                        points = generator.generate_points(dim, self.m, self.radius, f[2])
+                        points = generator.generate_points(dim, self.m, self.radius, f[1])
                         with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                             global_step = tf.Variable(0.0, name='gradient_train_gs' + str(dim), trainable=False, dtype=tf.float32)
                             if self.step > 0:
@@ -468,7 +476,7 @@ class MethodRunner:
                                 for i in range(self.iterations):
                                     _, f_curr = sess.run([optimizer, f_temp])
                                 temp = np.append(temp, f_curr)
-            return learning_rate, {'best': np.nanmin(temp).item(), 'worst': np.nanmax(temp).item(), 'mean': np.nanmean(temp).item(), "median": np.nanmedian(temp).item()}
+            return learning_rate, {'best': np.min(temp).item(), 'worst': np.max(temp).item(), 'mean': np.mean(temp).item(), "median": np.median(temp).item()}
 
         ## Parallel training
         with Pool(processes) as p:
@@ -507,7 +515,7 @@ class MethodRunner:
                     function_generator = generator.FunGen(dim, self.test_losses[loss][1][dim], loss)
                     functions = function_generator.generate(self.test_losses[loss][0])
                     for f in functions:
-                        points = generator.generate_points(dim, self.m, self.radius, f[2])
+                        points = generator.generate_points(dim, self.m, self.radius, f[1])
 
                         with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                             global_step = tf.Variable(0.0, name='gradient_test_gs' + str(dim), trainable=False, dtype=tf.float32)
@@ -534,7 +542,7 @@ class MethodRunner:
             return (metric_name, metric(results, axis=0))
 
         with Pool(processes) as p:
-            pairs = [[best_params['best'], np.nanmin, 'best'], [best_params['worst'], np.nanmax, 'worst'], [best_params['mean'], np.nanmean, 'mean'], [best_params['median'], np.nanmedian, 'median']]
+            pairs = [[best_params['best'], np.min, 'best'], [best_params['worst'], np.max, 'worst'], [best_params['mean'], np.mean, 'mean'], [best_params['median'], np.median, 'median']]
             test_results = p.map(test, pairs)
         test_results = {x: y for (x, y) in test_results}
 
@@ -578,7 +586,7 @@ class MethodRunner:
                         function_generator = generator.FunGen(dim, self.train_losses[loss][1][dim], loss)
                         functions = function_generator.generate(self.train_losses[loss][0])
                         for f in functions:
-                            points = generator.generate_points(dim, self.m, self.radius, f[2])
+                            points = generator.generate_points(dim, self.m, self.radius, f[1])
                             with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                                 global_step = tf.Variable(0.0, name='gradient_train_gs' + str(dim), trainable=False, dtype=tf.float32)
                                 if self.step > 0:
@@ -598,7 +606,7 @@ class MethodRunner:
                                     for i in range(self.iterations):
                                         _, f_curr = sess.run([optimizer, f_temp])
                                     temp = np.append(temp, f_curr)
-                decay_dict[decay] = {'best': np.nanmin(temp).item(), 'worst': np.nanmax(temp).item(), 'mean': np.nanmean(temp).item(), "median": np.nanmedian(temp).item()}
+                decay_dict[decay] = {'best': np.min(temp).item(), 'worst': np.max(temp).item(), 'mean': np.mean(temp).item(), "median": np.median(temp).item()}
             return learning_rate, decay_dict
 
         train_partial = partial(train, decays=decays)
@@ -638,7 +646,7 @@ class MethodRunner:
                     function_generator = generator.FunGen(dim, self.test_losses[loss][1][dim], loss)
                     functions = function_generator.generate(self.test_losses[loss][0])
                     for f in functions:
-                        points = generator.generate_points(dim, self.m, self.radius, f[2])
+                        points = generator.generate_points(dim, self.m, self.radius, f[1])
 
                         with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                             global_step = tf.Variable(0.0, name='gradient_test_gs' + str(dim), trainable=False, dtype=tf.float32)
@@ -665,7 +673,7 @@ class MethodRunner:
             return (metric_name, metric(results, axis=0))
 
         with Pool(processes) as p:
-            pairs = [[best_params['best'][0], best_params['best'][1], np.nanmin, 'best'], [best_params['worst'][0], best_params['worst'][1], np.nanmax, 'worst'], [best_params['mean'][0], best_params['mean'][1], np.nanmean, 'mean'], [best_params['median'][0], best_params['median'][1], np.nanmedian, 'median']]
+            pairs = [[best_params['best'][0], best_params['best'][1], np.min, 'best'], [best_params['worst'][0], best_params['worst'][1], np.max, 'worst'], [best_params['mean'][0], best_params['mean'][1], np.mean, 'mean'], [best_params['median'][0], best_params['median'][1], np.median, 'median']]
             test_results = p.map(test, pairs)
         test_results = {x: y for (x, y) in test_results}
 
@@ -710,7 +718,7 @@ class MethodRunner:
                         function_generator = generator.FunGen(dim, self.train_losses[loss][1][dim], loss)
                         functions = function_generator.generate(self.train_losses[loss][0])
                         for f in functions:
-                            points = generator.generate_points(dim, self.m, self.radius, f[2])
+                            points = generator.generate_points(dim, self.m, self.radius, f[1])
                             with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                                 global_step = tf.Variable(0.0, name='gradient_train_gs' + str(dim), trainable=False, dtype=tf.float32)
                                 if self.step > 0:
@@ -730,7 +738,7 @@ class MethodRunner:
                                     for i in range(self.iterations):
                                         _, f_curr = sess.run([optimizer, f_temp])
                                     temp = np.append(temp, f_curr)
-                decay_dict[decay] = {'best': np.nanmin(temp).item(), 'worst': np.nanmax(temp).item(), 'mean': np.nanmean(temp).item(), "median": np.nanmedian(temp).item()}
+                decay_dict[decay] = {'best': np.min(temp).item(), 'worst': np.max(temp).item(), 'mean': np.mean(temp).item(), "median": np.median(temp).item()}
             return learning_rate, decay_dict
 
         train_partial = partial(train, decays=decays)
@@ -771,7 +779,7 @@ class MethodRunner:
                     function_generator = generator.FunGen(dim, self.test_losses[loss][1][dim], loss)
                     functions = function_generator.generate(self.test_losses[loss][0])
                     for f in functions:
-                        points = generator.generate_points(dim, self.m, self.radius, f[2])
+                        points = generator.generate_points(dim, self.m, self.radius, f[1])
 
                         with tf.variable_scope(loss, reuse=tf.AUTO_REUSE):
                             global_step = tf.Variable(0.0, name='gradient_test_gs' + str(dim), trainable=False, dtype=tf.float32)
@@ -798,7 +806,7 @@ class MethodRunner:
             return (metric_name, metric(results, axis=0))
 
         with Pool(processes) as p:
-            pairs = [[best_params['best'][0], best_params['best'][1], np.nanmin, 'best'], [best_params['worst'][0], best_params['worst'][1], np.nanmax, 'worst'], [best_params['mean'][0], best_params['mean'][1], np.nanmean, 'mean'], [best_params['median'][0], best_params['median'][1], np.nanmedian, 'median']]
+            pairs = [[best_params['best'][0], best_params['best'][1], np.min, 'best'], [best_params['worst'][0], best_params['worst'][1], np.max, 'worst'], [best_params['mean'][0], best_params['mean'][1], np.mean, 'mean'], [best_params['median'][0], best_params['median'][1], np.median, 'median']]
             test_results = p.map(test, pairs)
         test_results = {x: y for (x, y) in test_results}
 
